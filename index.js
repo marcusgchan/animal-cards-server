@@ -1,10 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 const { Pool } = require("pg");
 const ApiError = require("./error/ApiError");
 const KEYS = require("./utils/databaseKeys");
+const getType = require("./utils/checkType");
 const PORT = process.env.PORT || 3001;
-const DATABASE_NAME = "animal_cards";
-const TABLE_NAME = "animals";
+const DATABASE_NAME = "animals";
+const TABLE_NAME = "cards";
 const CONNECTION_STRING = `postgresql://postgres@localhost:5432/${DATABASE_NAME}`;
 const KEYS_SET = new Set(KEYS);
 
@@ -12,13 +14,15 @@ const app = express();
 
 const pool = new Pool({ connectionString: CONNECTION_STRING });
 
+app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-  res.send("test!");
+  res.send("hi");
 });
 
-app.get("/api/animals", (req, res, next) => {
+app.get("/api/cards", (req, res, next) => {
   pool
     .query(`SELECT * FROM ${TABLE_NAME}`)
     .then((data) => res.json(data.rows))
@@ -29,9 +33,79 @@ app.get("/api/animals", (req, res, next) => {
     );
 });
 
-app.post("/api/animals", (req, res, next) => {
+app.put("/api/cards/:id", (req, res, next) => {
+  function buildString(card) {
+    let queryValues = [];
+    for (const key of KEYS_SET) {
+      if (card[key] === undefined) {
+        queryValues.push(`${key} = NULL`);
+      } else {
+        if (getType(card[key]) === "string") {
+          queryValues.push(`${key} = '${card[key]}'`);
+        } else if (getType(card[key]) === "number") {
+          queryValues.push(`${key} = ${card[key]}`);
+        } else {
+          ApiError.badRequest("Value of properties must be a string or int");
+          return;
+        }
+      }
+    }
+    return queryValues.join(", ");
+  }
+  const id = req.params.id;
+  const card = req.body;
+
+  // Check for valid input
+  if (
+    id === undefined ||
+    isNaN(Number(id)) ||
+    id.trim() === "" ||
+    card === undefined ||
+    card.name === undefined ||
+    card.name.trim() === "" // Card must have a name
+  ) {
+    next(ApiError.badRequest("Invalid request"));
+    return;
+  }
+  console.log(card);
+  console.log(buildString(card));
+  // test for put request where id isn't in the database
+  pool
+    .query(`UPDATE ${TABLE_NAME} SET ${buildString(card)} WHERE id = ${id}`)
+    .then((data) => {
+      res.status(204).end();
+    })
+    .catch((err) => next(ApiError.internal("Unable to query database")));
+});
+
+app.get("/api/cards/:id", (req, res, next) => {
+  const id = req.params.id;
+
+  if (isNaN(Number(id))) {
+    next(ApiError.badRequest("Invalid request"));
+    return;
+  }
+
+  pool
+    .query(`SELECT * FROM ${TABLE_NAME} WHERE id=${id}`)
+    .then((data) => {
+      if (data.rows[0]) {
+        res.json(data.rows[0]);
+      } else {
+        next(ApiError.notFound("This card does not exist"));
+        return;
+      }
+    })
+    .catch((err) =>
+      next(
+        ApiError.internal("Something went wrong with the database conenction")
+      )
+    );
+});
+
+app.post("/api/cards", (req, res, next) => {
   function getInputQueryString(card) {
-    const columnNames = Object.keys(card).join(", ");
+    const columnNames = Object.keys(card);
     const columnValues = Object.values(card)
       .map((val) => {
         if (typeof val === "number") {
@@ -71,7 +145,6 @@ app.post("/api/animals", (req, res, next) => {
     .query(getInputQueryString(reqObj))
     .then((data) => res.json(data.rows[0]))
     .catch((err) => {
-      console.log("test");
       next(ApiError.internal("Something went wrong with the query."));
     });
 });

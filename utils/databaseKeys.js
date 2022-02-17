@@ -1,14 +1,14 @@
 const keys = [
   "name",
+  "latin_name",
   "animal_type",
-  "active_time",
   "min_weight",
   "max_weight",
   "lifespan",
   "habitat",
-  "diet",
-  "img_link",
-  "geo_range",
+  "min_card_width",
+  "min_card_height",
+  "card_color",
 ];
 
 module.exports = keys;

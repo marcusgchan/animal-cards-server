@@ -1,24 +1,35 @@
 # Get all animals
-GET http://localhost:3001/api/animals HTTP/1.1
+GET http://localhost:3001/api/cards HTTP/1.1
 
 ###
 
 # Add an animal
-POST http://localhost:3001/api/animals HTTP/1.1
+POST http://localhost:3001/api/cards HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "dog",
+  "name": "mouse",
   "animal_type": "mammel"
 }
 
 ###
 
 # Add an invalid animal
-POST http://localhost:3001/api/animals HTTP/1.1
-# Content-Type: application/json
+POST http://localhost:3001/api/cards HTTP/1.1
+Content-Type: application/json
 
-# {
-#   "name": 1,
-#   "animal_type": "mammel"
-# }
+{
+  "name": 1,
+  "animal_type": "mammel"
+}
+
+###
+
+# Modify an animal
+PUT http://localhost:3001/api/cards/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "a",
+  "card_color": 3
+}
