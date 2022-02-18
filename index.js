@@ -178,6 +178,7 @@ app.delete("/api/cards/:id", (req, res, next) => {
 app.use(errorHandler);
 
 function errorHandler(err, req, res, next) {
+  console.log(err);
   if (err instanceof ApiError) {
     return res.status(err.code).send({ message: err.msg });
   }
