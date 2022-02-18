@@ -36,11 +36,12 @@ app.get("/api/cards", (req, res, next) => {
   pool
     .query(`SELECT * FROM ${TABLE_NAME}`)
     .then((data) => res.json(data.rows))
-    .catch((err) =>
+    .catch((err) => {
+      console.log(err);
       next(
         ApiError.internal("Something went wrong with the database conenction")
-      )
-    );
+      );
+    });
 });
 
 app.put("/api/cards/:id", (req, res, next) => {
@@ -178,7 +179,6 @@ app.delete("/api/cards/:id", (req, res, next) => {
 app.use(errorHandler);
 
 function errorHandler(err, req, res, next) {
-  console.log(err);
   if (err instanceof ApiError) {
     return res.status(err.code).send({ message: err.msg });
   }
