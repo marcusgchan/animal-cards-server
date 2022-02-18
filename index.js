@@ -28,10 +28,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("build"));
 
-app.get("/", (req, res) => {
-  res.send("hi");
-});
-
 app.get("/api/cards", (req, res, next) => {
   pool
     .query(`SELECT * FROM ${TABLE_NAME}`)
@@ -174,6 +170,10 @@ app.delete("/api/cards/:id", (req, res, next) => {
       next(ApiError.badRequest("Unable to query database to delete card"));
       return;
     });
+});
+
+app.get("*", (req, res) => {
+  res.sendFile("/build/index.html");
 });
 
 app.use(errorHandler);
