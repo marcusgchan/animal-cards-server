@@ -33,12 +33,11 @@ app.get("/api/cards", (req, res, next) => {
   pool
     .query(`SELECT * FROM ${TABLE_NAME}`)
     .then((data) => res.json(data.rows))
-    .catch((err) => {
-      console.log(err);
+    .catch((err) =>
       next(
         ApiError.internal("Something went wrong with the database conenction")
-      );
-    });
+      )
+    );
 });
 
 app.put("/api/cards/:id", (req, res, next) => {
