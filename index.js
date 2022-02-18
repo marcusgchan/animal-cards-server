@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
@@ -7,16 +8,23 @@ const getType = require("./utils/checkType");
 const PORT = process.env.PORT || 3001;
 const DATABASE_NAME = "animals";
 const TABLE_NAME = "cards";
-const CONNECTION_STRING = `postgresql://postgres@localhost:5432/${DATABASE_NAME}`;
+const PASSWORD = process.env.PASSWORD;
+const USERNAME = process.env.USERNAME;
+const CONNECTION_STRING = `postgresql://${USERNAME}:${PASSWORD}@localhost:5432/${DATABASE_NAME}`;
 const KEYS_SET = new Set(KEYS);
 
 const app = express();
 
-const pool = new Pool({ connectionString: CONNECTION_STRING });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || CONNECTION_STRING,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static("build"));
 
 app.get("/", (req, res) => {
   res.send("hi");
@@ -67,8 +75,7 @@ app.put("/api/cards/:id", (req, res, next) => {
     next(ApiError.badRequest("Invalid request"));
     return;
   }
-  console.log(card);
-  console.log(buildString(card));
+
   // test for put request where id isn't in the database
   pool
     .query(`UPDATE ${TABLE_NAME} SET ${buildString(card)} WHERE id = ${id}`)
@@ -146,6 +153,23 @@ app.post("/api/cards", (req, res, next) => {
     .then((data) => res.json(data.rows[0]))
     .catch((err) => {
       next(ApiError.internal("Something went wrong with the query."));
+      return;
+    });
+});
+
+app.delete("/api/cards/:id", (req, res, next) => {
+  const { id } = req.params;
+  if (isNaN(Number(id))) {
+    next(ApiError.badRequest("Invalid request format"));
+    return;
+  }
+
+  pool
+    .query(`DELETE FROM ${TABLE_NAME} WHERE id=${id}`)
+    .then(() => res.status(204).end())
+    .catch((err) => {
+      next(ApiError.badRequest("Unable to query database to delete card"));
+      return;
     });
 });
 

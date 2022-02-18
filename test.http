@@ -33,3 +33,9 @@ Content-Type: application/json
   "name": "a",
   "card_color": 3
 }
+
+###
+
+# Delete an animal
+DELETE http://localhost:3001/api/cards/1 HTTP/1.1
+Content-Type: application/json
