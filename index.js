@@ -15,12 +15,14 @@ const KEYS_SET = new Set(KEYS);
 
 const app = express();
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || CONNECTION_STRING,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthroized: false,
+      },
+    })
+  : new Pool({ connectionString: CONNECTION_STRING });
 
 app.use(cors());
 app.use(express.json());
@@ -176,7 +178,6 @@ app.delete("/api/cards/:id", (req, res, next) => {
 app.use(errorHandler);
 
 function errorHandler(err, req, res, next) {
-  console.log(err);
   if (err instanceof ApiError) {
     return res.status(err.code).send({ message: err.msg });
   }
@@ -184,4 +185,4 @@ function errorHandler(err, req, res, next) {
   res.status(500).json("Something went wrong with the server.");
 }
 
-app.listen(PORT, () => console.log("Server is running!"));
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
