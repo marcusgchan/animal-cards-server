@@ -1,0 +1,42 @@
+github (client): https://github.com/marcusgchan/animal-cards-client
+github (server): https://github.com/marcusgchan/animal-cards-server
+heroku: https://lit-oasis-71382.herokuapp.com/
+
+The frontend is using React, React router, and axios.
+
+###
+
+Creating is done in the create page:
+
+The properties are: 
+name (string)
+animal_type (string)
+latin_name (string)
+habitat (string)
+lifespan (number)
+min_weight (number)
+max_weight (number)
+
+height (number)     last 3 properties are set on the right side using slider and color picker
+width (number)
+color (hex number)
+
+Note: the height and width set the min height and min width of the rectangle to avoid breaking
+the looks.
+
+These properties can be added to the card by clicking the + sign.
+Removing a property is done by clicking the - sign on the right side of the property. 
+
+Note: the name property cannot be removed
+
+###
+
+Modifying can be done by clicking on view button and then selecting the card.
+
+###
+
+Deleting is done through the modifying page
+
+###
+
+You can view and filter all cards in the view page
