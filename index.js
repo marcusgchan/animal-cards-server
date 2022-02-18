@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
@@ -173,7 +174,7 @@ app.delete("/api/cards/:id", (req, res, next) => {
 });
 
 app.get("*", (req, res) => {
-  res.sendFile("/build/index.html");
+  res.sendFile(path.join(__dirname, "/build/index.html"));
 });
 
 app.use(errorHandler);
